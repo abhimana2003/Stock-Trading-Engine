@@ -1,5 +1,5 @@
 # Stock-Trading-Engine
-### Anjali Bhimanadham
+Anjali Bhimanadham
 
 ## Project Folders Structure
 ```
@@ -31,7 +31,7 @@ java -cp bin Main
 ## File Descriptions
 - **`Main.java`**: The main entry point for the simulation.
 - **`Order.java`**: defines the Order class for buying and selling stock orders
-- **`StockTradingEngine.java`**: defines the Stock Trading Engine class and all the methosd for it including addOrder and matchOrder
+- **`StockTradingEngine.java`**: defines the Stock Trading Engine class and all the methods for it, including addOrder and matchOrder
 
 
 
