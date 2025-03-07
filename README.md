@@ -1,5 +1,5 @@
 # Stock-Trading-Engine
-# Anjali Bhimanadham
+### Anjali Bhimanadham
 
 ## Project Folders Structure
 ```
