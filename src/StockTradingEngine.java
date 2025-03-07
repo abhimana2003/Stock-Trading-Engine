@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.*;
 
 public class StockTradingEngine {
     private static final int MAX_NUM_OF_TICKERS = 1024;
-    private AtomicReferenceArray<AtomicReference<Order>> buyingOrders;
-    private AtomicReferenceArray<AtomicReference<Order>> sellingOrders;
+    private final AtomicReferenceArray<AtomicReference<Order>> buyingOrders;
+    private final AtomicReferenceArray<AtomicReference<Order>> sellingOrders;
     /** 
     * Constructs a stock trading engine
     */

@@ -1,13 +1,37 @@
 # Stock-Trading-Engine
+# Java Project
 
-## Getting Started
+## Project Folders Structure
+```
+/Stock-Trading-Engine
+  /src
+    Main.java
+    Order.java
+    StockTradingEngine.java
+  /bin
+  /.vscode
+  README.md
+```
 
-## Folder Structure
+## Compilation and Execution
 
-The workspace contains two folders by default, where:
+### **Compiling the Project**
+* Need to be at project's root folder
+To compile all the Java files in the src file, run this command:
+```sh
+javac -d bin src/*.java
+```
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+### **Running the Simulation**
+After compiling the project, you can run the stock trading engine simulator using:
+```sh
+java -cp bin Main
+```
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+## Class Descriptions
+- **`Main.java`**: The main entry point for the simulation.
+- **`Order.java`**: defines the Order class for buying and selling stock orders
+- **`StockTradingEngine.java`**: defines the Stock Trading Engine class and all the methosd for it including addOrder and matchOrder
+
+
 
