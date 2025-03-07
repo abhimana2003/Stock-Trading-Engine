@@ -1,5 +1,5 @@
 # Stock-Trading-Engine
-# Java Project
+# Anjali Bhimanadham
 
 ## Project Folders Structure
 ```
@@ -28,7 +28,7 @@ After compiling the project, you can run the stock trading engine simulator usin
 java -cp bin Main
 ```
 
-## Class Descriptions
+## File Descriptions
 - **`Main.java`**: The main entry point for the simulation.
 - **`Order.java`**: defines the Order class for buying and selling stock orders
 - **`StockTradingEngine.java`**: defines the Stock Trading Engine class and all the methosd for it including addOrder and matchOrder
