@@ -125,57 +125,77 @@ public class StockTradingEngine {
     * @param tickerSymbol ticker symbol
     */
     private void matchOrders(int index, String tickerSymbol) {
-        AtomicReference<Order> buyingHeadRef = buyingOrders.get(index);
-        AtomicReference<Order> sellingHeadRef = sellingOrders.get(index);
-    
         while (true) {
+            // Get current head atomic references of buy and sell order linked lists
+            AtomicReference<Order> buyingHeadRef = buyingOrders.get(index);
+            AtomicReference<Order> sellingHeadRef = sellingOrders.get(index);
+            
             Order buyingHead = buyingHeadRef.get();
             Order sellingHead = sellingHeadRef.get();
-    
-            // If either order book is empty matches can't be made so just return
+            
+            // If either list is empty no matches can be made so just break
             if (buyingHead == null || sellingHead == null) {
-                return;
-            }
-    
-            // if a match can be made
-            if (buyingHead.price >= sellingHead.price) {
-                int buyQuantity = buyingHead.quantity.get();
-                int sellQuantity = sellingHead.quantity.get();
-    
-                // just in case making sure no illegal matches can happen
-                if (buyQuantity <= 0 || sellQuantity <= 0) {
-                    return;
-                }
-    
-                int matchedQuantity = Math.min(buyQuantity, sellQuantity);
-                boolean buyUpdated = buyingHead.quantity.compareAndSet(buyQuantity, buyQuantity - matchedQuantity);
-                boolean sellUpdated = sellingHead.quantity.compareAndSet(sellQuantity, sellQuantity - matchedQuantity);
-    
-                // make sure both updates were successful otherwise try again
-                if (!buyUpdated || !sellUpdated) {
-                    continue; 
-                }
-    
-                System.out.println("Matched " + matchedQuantity + " shares of " + tickerSymbol + " at price " + sellingHead.price);
-    
-                // Remove buying order if completed
-                if (buyingHead.quantity.get() == 0) {
-                    Order nextBuyOrder = buyingHead.next.get();
-                    buyingHeadRef.compareAndSet(buyingHead, nextBuyOrder);
-                }
-    
-                // Remove selling order if completed
-                if (sellingHead.quantity.get() == 0) {
-                    Order nextSellOrder = sellingHead.next.get();
-                    sellingHeadRef.compareAndSet(sellingHead, nextSellOrder);
-                }
-                
-            } else {
-                // No matching orders, exit loop
                 break;
+            }
+            
+            // buying price at the head is less than the selling price at the head so no match can be made
+            else if (buyingHead.price < sellingHead.price) {
+                break;
+            }
+            
+            // if none of the above conditions are met match can be made
+            int buyQuantity = buyingHead.quantity.get();
+            int sellQuantity = sellingHead.quantity.get();
+            
+            if (buyQuantity <= 0 || sellQuantity <= 0) {
+                // Order might have been matched by another thread so just remove the heads
+                if (buyQuantity <= 0) {
+                    if (buyingHeadRef.compareAndSet(buyingHead, buyingHead.next.get())){
+                        continue;
+                    }
+                }
+                if (sellQuantity <= 0) {
+                    if (sellingHeadRef.compareAndSet(sellingHead, sellingHead.next.get())){
+                        continue;
+                    }  
+                }
+                // If removing the heads doesn't work just retry
+                continue;
+            }
+            // calculate how much quantity can actually be matched
+            int matchedQuantity = Math.min(buyQuantity, sellQuantity);
+            
+            // Try to update buy order quantity atomically
+            int newBuyQuantity = buyQuantity - matchedQuantity;
+            if (!buyingHead.quantity.compareAndSet(buyQuantity, newBuyQuantity)) {
+                // if compare and set fails then another thread must have made changes so reset and retry 
+                continue;
+            }
+            
+            // Try to update sell order quantity atomically
+            int newSellQuantity = sellQuantity - matchedQuantity;
+            if (!sellingHead.quantity.compareAndSet(sellQuantity, newSellQuantity)) {
+                // if compare and set fails then another thread must have made changes so reset and retry 
+                buyingHead.quantity.compareAndSet(newBuyQuantity, buyQuantity);
+                continue;
+            }
+            
+            // Match successful, print the match
+            System.out.println("Matched " + matchedQuantity + " shares of " + tickerSymbol + " at price " + sellingHead.price);
+
+            // if the buy order at the head is fullfilled try to remove it atomically
+            if (newBuyQuantity == 0) {
+                buyingHeadRef.compareAndSet(buyingHead, buyingHead.next.get());
+        
+            }
+
+            // if the sell order at the head is fullfilled try to remove it atomically
+            if (newSellQuantity == 0) {
+                sellingHeadRef.compareAndSet(sellingHead, sellingHead.next.get());
             }
         }
     }
+    
     
     /** simulates concurrent trading using threads
     * @param maxNumOrders max number of orders each thread would be able to make 
